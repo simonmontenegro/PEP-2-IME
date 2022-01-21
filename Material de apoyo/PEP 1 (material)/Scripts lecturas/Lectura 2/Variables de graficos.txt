@@ -1,0 +1,11 @@
+data: un data frame.
+x: string con el nombre de la variable x.
+y: string(s) con el(los) nombre(s) de la(s) variable(s) a graficar.
+color: color de delineado.
+fill: color de relleno.
+palette: paleta de colores cuando existen múltiples grupos.
+linetype: tipo de línea a emplear.
+add: permite agregar elementos adicionales al gráfico, como barras de error o la media, entre otros.
+title: título del gráfico.
+xlab: rótulo del eje x. Puede ocultarse usando xlab = FALSE.
+ylab: rótulo del eje y. Puede ocultarse usando ylab = FALSE.

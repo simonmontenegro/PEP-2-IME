@@ -1,0 +1,12 @@
+Comentario 'Se obtienen las 25 muestras aleatorias' sin sentido.
+
+Obtiene muestras de tamaño solicitado.
+
+No es claro al proponer la prueba que necesita: dice 'se busca comprobar acerca de la diferencia PROMEDIO de dos muestras pareadas' 
+con 'la prueba t para dos muestras independientes'. ¿Sabe la diferencia? ¿Cuándo se usa cada caso?
+
+Las hipótesis propuestas son para muestras pareadas.
+
+Realiza una prueba t con las diferencias pareadas.
+
+No contextualiza la conclusión, que sí está basada en los resultados de la prueba (equivocada) realizada.

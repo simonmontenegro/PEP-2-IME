@@ -1,0 +1,4 @@
+1) La edad promedio en Chile es la misma entre personas casadas y solteras.
+
+2) La cantidad de hijos (nacidos vivos) promedio es similar entre hogares
+de tres regiones de Chile (metropolitana, tarapaca, la araucania)

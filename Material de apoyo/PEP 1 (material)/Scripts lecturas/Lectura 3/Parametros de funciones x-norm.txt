@@ -1,0 +1,11 @@
+x, q: vector de cuantiles (percentiles).
+p: vector de probabilidades.
+mean: media de la distribución normal.
+sd: desviación estándar de la distribución normal.
+lower.tail: valor lógico que señala cuál de los dos extremos o colas de la distribución emplear.
+n: tamaño del vector resultante.
+
+Es importante señalar que, por defecto, lower.tail toma el valor verdadero, con lo que pnorm() y qnorm()
+operan con la cola inferior de la distribución. Si, en cambio, lower.tail = FALSE, dichas funciones operan
+con la cola superior (es decir, pnorm() nos entrega la probabilidad de que la variable tome valores mayores
+que un valor dado).

@@ -1,0 +1,5 @@
+x, q son vectores de cuantiles (enteros no negativos).
+p es un vector de probabilidades.
+n es la cantidad de observaciones.
+df son los grados de libertad.
+lower.tail es análogo al de la función pnorm.

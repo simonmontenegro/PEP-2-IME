@@ -1,0 +1,5 @@
+x es un vector numérico.
+p es un vector de probabilidades.
+n es la cantidad de observaciones.
+size corresponde al número de intentos.
+prob es la probabilidad de éxito de cada intento.
