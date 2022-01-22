@@ -3,6 +3,12 @@ library(pwr)
 library(ggplot2)
 library(tidyverse)
 library(ez)
+library(leaps)
+library(car)
+library(lmtest)
+library(caret)
+library(pROC)
+library(caret)
 
 # Se especifica y almacena la ruta del directorio de la base de datos.
 dir <- "~/../Desktop/IME/PEP_2/PEP-2-IME"
@@ -14,7 +20,7 @@ datos <- read.csv2(arch, fileEncoding = "UTF-8")
 
 # --------------- PREGUNTA 1 ---------------
 # Lord Vader desea saber si los niveles de exigencia con que los instructores de las 
-# diferentes divisiones evalÃºan a los nuevos soldados son similares, por lo que le ha 
+# diferentes divisiones evalúan a los nuevos soldados son similares, por lo que le ha 
 # solicitado estudiar si existen diferencias significativas en el promedio de la 
 # evaluaciÃ³n realizada por el instructor entre las distintas divisiones. El Lord Sith 
 # ha sido muy claro al solicitar un reporte de aquellas divisiones en las que se observen 
@@ -192,17 +198,71 @@ datos_filtrados1 <- datos_filtrados1[sample(nrow(datos_filtrados1), 200, replace
 # Se juntan ambas muestras para formar una Ãºnica muestra aleatoria de tamaÃ±o 400 (200 reclutas y 200 clones)
 datos_filtrados_final <- rbind(datos_filtrados0, datos_filtrados1)
 
+#Se guarda la columna es_clon por si se utilizan más adelante.
+is_clon <- datos_filtrados_final["es_clon"]
+  
+#Se obtienen las 8 variables, primero eliminando la variable es_clon, id y division.
+datos_filtrados_final["es_clon"] <- NULL
+datos_filtrados_final["id"] <- NULL
+datos_filtrados_final["division"] <- NULL
+columnas_muestra <- colnames(datos_filtrados_final)
+
+#Ahora, se seleccionan aleatoria mente las 8 variables
+predictores_aleatorios <- sample(columnas_muestra, 8)
+nuevos_datos <- datos_filtrados_final[predictores_aleatorios]
+nuevos_datos <- cbind(nuevos_datos, is_clon)
+
 # Se realiza el ajuste del modelo nulo y completo
-nulo <- glm(es_clon ~ 1, family = binomial(link = "logit"), data = datos_filtrados_final)
-completo <- glm(es_clon ~ ., family = binomial(link = "logit"), data = datos_filtrados_final)
+nulo <- glm(es_clon ~ 1, family = binomial(link = "logit"), data = nuevos_datos)
+completo <- glm(es_clon ~ ., family = binomial(link = "logit"), data = nuevos_datos)
 
 # Se realiza un ajuste con selecciÃ³n hacia delante.
-adelante <- step(nulo, scope = list(upper = completo), direction = "forward", trace = 1)
+modelo <- step(nulo, scope = list(upper = completo), direction = "forward", trace = 1, steps = 4)
+print(summary(modelo))
+
+# Con lo anterior, se puede ver que el procedimiento de "step" muestra aquellas variables que pueden ser agregadas al modelo y que 
+# lo "mejoran", esto dado a que reducen el valor de AIC cada vez que se agregan un nuevo predictor.
+# Los predictores seleccionados son: velocidad, agilidad, fuerza y precision (en ese orden; de izquierda a derecha), con esto
+# se realiza una actualización del modelo añadiendo estas variables (predictores); esta acción es propia de la función step(),
+# asi que "modelo" ya contiene los predictores mencionados.
+
+# Así, se procede a comprobar las condiciones para la regresión logística.
+# Debe existir una relación lineal entre los predictores y la respuesta transformada.
+correlaciones <- round(cor(x = nuevos_datos, method = "pearson"), 3)
+#Al analizar las correlaciones con la variable de respuesta (es_clon)
+# se puede ver que presentan valores que se relacionan de buena manera con la variable a predecir.
+
+#Los residuos deben ser independientes entre sí.
+# Comprobación de independencia de los residuos.
+cat("\nPrueba de Durbin-Watson para autocorrelaciones.")
+cat("entre errores:\n")
+print(durbinWatsonTest(modelo))
+#Se cumple con la independencia de los residuos, puesto que el p-value obtenido
+# está muy por sobre el nivel de significancia, por lo que se puede concluir que 
+# en efecto los residuos son independientes.
+
+#Comprobación de multicolinealidad
+vifs <- vif(modelo_final)
+cat("\nVerificar la multicolinealidad:\n")
+cat("- VIFs: \n")
+print(vifs)
+cat("- Tolerancias:\n")
+print(1 / vifs)
+cat("- VIF medio:", mean(vifs), "\n")
+
+
+# Revisar casos con distancia de Cook mayor a uno.
+resultado <- data.frame(predicted.probabilities = fitted(modelo))
+sospechosos2 <- which(output[["cooks.distance"]] > 1)
+sospechosos2 <- sort(sospechosos2)
+cat ("\n\n")
+cat ("Residuales con una distancia de Cook alta \n")
+cat ("- - - - - - - - - - -- - - - - - - - - - - - - - - - - - - - -- - - - - - - - -\n")
+print(rownames(entrenamiento[sospechosos2, ]))
 
 
 
-
-# CONCLUSIONES
+# Conclusiones
 #
 
 
@@ -210,8 +270,24 @@ adelante <- step(nulo, scope = list(upper = completo), direction = "forward", tr
 # Proponga un ejemplo novedoso (no mencionado en clase ni que aparezca en las lecturas dadas) en donde un
 # estudio o experimento, relacionado con el sentir de los estudiantes de la Universidad de Santiago respecto al retorno a
 # la presencialidad, necesite utilizar una prueba de Friedman debido a problemas con la escala de la variable dependiente
-# en estudio. IndiquÃ© cuÃ¡les serÃ­an las variables involucradas en su ejemplo (con sus respectivos niveles) y las hipÃ³tesis
+# en estudio. Indique cuáles serÃ­an las variables involucradas en su ejemplo (con sus respectivos niveles) y las hipótesis
 # nula y alternativa a contrastar.
+
+# La directiva de la Universidad de Santiago de Chile desea conocer la preferencia de sus estudiantes con respecto al retorno
+# a clases presenciales de acuerdo a algunas medidas que ha tomado el establecimiento con respecto a convatir el coronavirus,
+# brindandoles la confianza de volver a clases a sus estudiantes. Específicamente, se desea evaluar las variables de distanciamiento 
+# físico (en la sala de clases), la sanitización (qué tan bien es realizado este y cada cuánto tiempo), y la seguridad (verificar 
+# la temperatura de todas las personas que ingresan y si estas tienen sus vacunas al día). Esta evaluación, lo hace con ayuda 
+# de la escala Likert de 6 puntos, donde 1 indica "estoy muy en desacuerdo", y el 6 indica "estoy muy de acuerdo". 
+
+# Por tanto, se establecen las siguientes hipótesis:
+# H0: Las variables evaluadas tienen resultados positivos (mayor o igual a 5).
+# HA: Al menos una de las variables evaluadas tiene un resultado no positivo (mayor o igual a 5).
+
+#      Usuario    Distanciamiento    Sanitización    Seguridad
+#       1              5                3              6
+#       2              4                1              4
+#      ...            ...              ...            ...
 
 
 
