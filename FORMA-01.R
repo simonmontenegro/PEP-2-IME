@@ -157,9 +157,32 @@ print(post_hoc)
 # Considere la semilla 21 para obtener una muestra de 400 datos, 80% de los cuales serán empleados para ajustar el
 # modelo y el 20% restante, para evaluarlo.
 
+# Dado que se requiere evaluar un modelo clasificador con 2-5 variables predictoras, estamos ante un modelo de tipo regresión múltiple,
+# específicamente, como la variable a "predecir" corresponde a una variable dicotómica (es clon / es recluta) se trata de una
+# regresión logística. Ante esto, se procede a realizar el paso a paso para evaluar el modelo.
+
+# Se establece la semilla según enunciado (21)
+semilla <- 21
+set.seed(semilla)
+
+# Se define la siguiente función para expresar la variable dicotómica de manera numérica (1 o 0); 0 para reclutas, 1 para clones.
+es_clon <- function(x){
+  if(x == "N"){
+    return(0)
+  }else{
+    return(1)
+  }
+}
+
+#Se transforma el string de "es_clon" y se expresa numéricamente (0 o 1)
+datos[["es_clon"]] <- sapply(datos[["es_clon"]], es_clon)
+
+#Se pegan ambas columnas de datos a los datos de la muestra
+#datos_mujeres <- cbind(datos_mujeres, IMC, EN)
 
 
-# Las hip�tesis a formular son:
+
+# Las hipótesis a formular son:
 # H0:
 # HA: 
 
@@ -174,9 +197,13 @@ print(post_hoc)
 #
 
 
-# --------------- PREGUNTA 2 ---------------
-Proponga un ejemplo novedoso (no mencionado en clase ni que aparezca en las lecturas dadas) en donde un
-estudio o experimento, relacionado con el sentir de los estudiantes de la Universidad de Santiago respecto al retorno a
-la presencialidad, necesite utilizar una prueba de Friedman debido a problemas con la escala de la variable dependiente
-en estudio. Indiqué cuáles serían las variables involucradas en su ejemplo (con sus respectivos niveles) y las hipótesis
-nula y alternativa a contrastar.
+# --------------- PREGUNTA 3 ---------------
+# Proponga un ejemplo novedoso (no mencionado en clase ni que aparezca en las lecturas dadas) en donde un
+# estudio o experimento, relacionado con el sentir de los estudiantes de la Universidad de Santiago respecto al retorno a
+# la presencialidad, necesite utilizar una prueba de Friedman debido a problemas con la escala de la variable dependiente
+# en estudio. Indiqué cuáles serían las variables involucradas en su ejemplo (con sus respectivos niveles) y las hipótesis
+# nula y alternativa a contrastar.
+
+
+
+
